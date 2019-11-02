@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iris-messaging
+  labels:
+    app: iris-messaging
+spec:
+  type: NodePort
+  selector:
+    app: iris-messaging
+  ports:
+    - name: port-80
+      port: 80
+      targetPort: 80
+      nodePort: 30205
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: iris-messaging-headless
+  labels:
+    app: iris-messaging-headless
+spec:
+  clusterIP: None
+  ports:
+    - name: tcp-2551
+      protocol: TCP
+      port: 2551
+    - name: tcp-80
+      protocol: TCP
+      port: 80
+  selector:
+    app: iris-messaging
+
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: iris-messaging-budget
+spec:
+  selector:
+    matchLabels:
+      app: cookim
+  minAvailable: 2
+
+---
+apiVersion: apps/v1alpha1
+kind: StatefulSet
+metadata:
+  name: irismessaging
+spec:
+  serviceName: irismessaging-headless
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: irismessaging
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
+        scheduler.alpha.kubernetes.io/affinity: >
+          {
+            "podAntiAffinity": {
+              "requiredDuringSchedulingRequiredDuringExecution": [{
+                "labelSelector": {
+                  "matchExpressions": [{
+                    "key": "app",
+                    "operator": "In",
+                    "values": ["iris-messaging-headless"]
+                  }]
+                },
+                "topologyKey": "kubernetes.io/hostname"
+              }]
+            }
+          }
+    spec:
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+        - name: timezone
+          hostPath:
+            path: /etc/timezone
+      containers:
+        - name: iris-messaging
+          imagePullPolicy: Always
+          image:
+          ports:
+            - containerPort: 2551
+              protocol: TCP
+            - containerPort: 80
+              protocol: TCP
+          env:
+            - name: "WEB_PORT"
+              value: "80"
+            - name: "AKKA_PORT"
+              value: "2551"
+            - name: "SEED_NODES"
+              value: "iris-messaging-0.iris-messaging-headless.default.svc.cluster.local:2551"
+          volumeMounts:
+            - name: localtime
+              mountPath: "/etc/localtime"
+              readOnly: true
+            - name: timezone
+              mountPath: "/etc/timezone"
+              readOnly: true
+          resources:
+            requests:
+              memory: "1Gi"
+            limits:
+              memory: "2Gi"

@@ -1,0 +1,12 @@
+CREATE KEYSPACE iris_messaging IF NOT EXISTS
+WITH REPLICATION = {
+    'class' : 'SimpleStrategy', 'replication_factor' : 1
+  };
+
+
+CREATE TABLE IF NOT EXISTS iris_messaging.mailbox(
+       user_id      uuid,
+       event_time   timeuuid,
+       data         blob
+       PRIMARY_KEY((user_id), event_time)
+) WITH CLUSTERING ORDER BY (event_time DESC);

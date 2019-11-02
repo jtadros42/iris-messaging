@@ -18,8 +18,8 @@ object IrisMessaging extends App {
   val akkaPort      = parsedArgs.getAkkaPort()
   val seedNodes     = parsedArgs.getSeedNodes()
 
-  implicit val system       = ActorSystem("chat-cluster")
-  implicit val materializer = ActorMaterializer()
+  implicit val system            = ActorSystem("chat-cluster")
+  implicit val materializer      = ActorMaterializer()
   implicit val notificationActor = system.actorOf(Props(classOf[NotificationActor]))
 
   Http().bindAndHandle(Routes.logRoute, "0.0.0.0", webPort, connectionContext = serverContext)

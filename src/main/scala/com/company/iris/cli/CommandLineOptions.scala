@@ -7,7 +7,7 @@ object CommandLineOptions {
   options.addOption(
     CliOption
       .builder("h")
-      .longOpt("host-name")
+      .longOpt("HOST-NAME")
       .desc("current web service external host name")
       .hasArg()
       .required()
@@ -17,7 +17,7 @@ object CommandLineOptions {
   options.addOption(
     CliOption
       .builder("w")
-      .longOpt("web-port")
+      .longOpt("WEB-PORT")
       .desc("web service port")
       .hasArg()
       .required()
@@ -27,7 +27,7 @@ object CommandLineOptions {
   options.addOption(
     CliOption
       .builder("a")
-      .longOpt("akka-port")
+      .longOpt("AKKA-PORT")
       .desc("akka cluster node port")
       .hasArg()
       .required()
@@ -37,7 +37,7 @@ object CommandLineOptions {
   options.addOption(
     CliOption
       .builder("s")
-      .longOpt("seed-nodes")
+      .longOpt("SEED-NODES")
       .desc("akka cluster seed nodes, seperate with comma, example: localhost:2551,localhost:2552")
       .hasArg()
       .required()
